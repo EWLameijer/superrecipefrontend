@@ -2,7 +2,7 @@ import axios from "axios";
 import { useContext, useEffect, useState } from "react";
 import { StateContext } from "./StateContext";
 
-export default function Home() {
+function Home() {
 
     const {setState} = useContext(StateContext);
     const [recipes, setRecipes] = useState([]);
@@ -26,7 +26,7 @@ export default function Home() {
                 <button onClick={(e) => {
                     e.preventDefault();
                     setState(recipe.name);
-                }}>{recipe.name}</button> - {recipe.keywords.join(", ")}
+                }}>{recipe.name}</button> - {recipe.keywords.replaceAll(",", ", ")}
             </li>
     )});
 
@@ -39,3 +39,5 @@ export default function Home() {
         </>
     );
 }
+
+export default Home;

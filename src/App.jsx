@@ -1,18 +1,16 @@
-import { useContext, useState } from "react";
-import "./App.css";
-import { StateContext } from "./assets/StateContext";
-import Home from "./assets/Home";
-import Recipe from "./assets/Recipe";
-import axios from "axios";
-import {BrowserRouter, Routes, Route} from "react-router-dom";
-import Login from "./assets/Login";
+import { useContext, useState } from 'react'
+import './App.css'
+import { StateContext } from './assets/StateContext'
+import Home from './assets/Home'
+import Recipe from './assets/Recipe'
+import axios from 'axios';
 
-export default function App() {
+function App() {
   const {state} = useContext(StateContext)
   const [search, setSearch] = useState('');
   const fetchDat = async () => {
     const res = await
-      axios.get("http://localhost:8080/api/recipes/search");
+      axios.get("http://localhost:8080/api/recipes/search")
     console.log(res.data.sort((a, b) => {
       const distanceA = levenshteinDistance(a, search);
       const distanceB = levenshteinDistance(b, search);
@@ -20,58 +18,46 @@ export default function App() {
     }));
   }
 
-  /**
-   * Calculates the measure of the difference between two strings
-   * @param {String} string1 First string
-   * @param {String} string2 Second string
-   * @returns {Number} The calculated difference
-   */
-  function levenshteinDistance(string1, string2) {
-    if (!string1.length) return string2.length;
-    if (!string2.length) return string1.length;
+  function levenshteinDistance(str1, str2) {
+    const m = str1.length;
+    const n = str2.length;
 
-    const length1 = string1.length;
-    const length2 = string2.length;
-
-    const array = Array.from({ length: length1 + 1 }, () =>
-      Array(length2 + 1).fill(0));
+    const dp = Array.from({ length: m + 1 }, () =>
+      Array(n + 1).fill(0));
       
-    for (let i = 0; i <= length1; i++) {
-      for (let j = 0; j <= length2; j++) {
+    for (let i = 0; i <= m; i++) {
+      for (let j = 0; j <= n; j++) {
         if (i === 0) {
-          array[i][j] = j;
+          dp[i][j] = j;
         } else if (j === 0) {
-          array[i][j] = i;
+          dp[i][j] = i;
         } else {
-          const cost = string1[i - 1] === string2[j - 1] ? 0 : 1;
-          array[i][j] = Math.min(
-            array[i - 1][j] + 1,
-            array[i][j - 1] + 1,
-            array[i - 1][j - 1] + cost
+          const cost = str1[i - 1] === str2[j - 1] ? 0 : 1;
+          dp[i][j] = Math.min(
+            dp[i - 1][j] + 1,
+            dp[i][j - 1] + 1,
+            dp[i - 1][j - 1] + cost
           );
         }
       }
     }
-    return array[length1][length2];
+    return dp[m][n];
   }
 
   return (
     <>
       <form onSubmit={e => { e.preventDefault(); fetchDat(); }}>
-        <input type="text" onChange={e => { setSearch(e.target.value) }} /> <br />
-        <button type="submit">Submit</button>
+        <input type='text' onChange={e => { setSearch(e.target.value) }} /> <br />
+        <button type='submit'>Submit</button>
       </form>
-      <h1><img src="/garlic-svgrepo-com.svg" alt="Could not load image" width="75" />Super Recipes</h1>
+      <h1><img src="/garlic-svgrepo-com.svg" alt="Could not load image" width={75}  />Super Recipes</h1>
       <div>
-        <BrowserRouter>
-          <Routes>
-            <Route path="/" element={<Home />} />
-            <Route path="/recipe/:recipeName" element={<Recipe />} />
-            <Route path="/login" element={<Login />} />
-          </Routes>
-        </BrowserRouter>
+        {state === "home" && <Home />}
+        {state !== "home" && <Recipe recipeName={state} />}
       </div>
     </>
 
   )
 }
+
+export default App
